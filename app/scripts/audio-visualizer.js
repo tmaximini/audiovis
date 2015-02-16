@@ -2,6 +2,8 @@
 
 var Visualizer = function() {
 
+  var self = this;
+
   var canvas, w, h, ctx;
   var counter = 0;
 
@@ -39,8 +41,9 @@ var Visualizer = function() {
     modX = getRandomNumber({ range: 2 });
   };
 
-  var init = function() {
-    canvas = document.getElementById('canvas');
+  this.init = function() {
+    canvas = document.createElement('canvas');
+    document.body.appendChild(canvas);
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
     ctx = canvas.getContext('2d');
@@ -48,22 +51,18 @@ var Visualizer = function() {
     setInterval(updateModifiers, 250);
   };
 
-
-  var draw = function() {
+  this.draw = function() {
     rotate();
     ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
     ctx.strokeStyle = colors[Math.floor(Math.random() * colors.length)];
     var zeroOrOne = Math.random() < 0.5 ? 0 : 1;
     ctx[methods[zeroOrOne]](w/2 + getRandomNumber(), h/2 + getRandomNumber(), 50 * (1+modX) , 50 * (1+modX));
-    window.requestAnimationFrame(draw);
+    window.requestAnimationFrame(self.draw);
   };
-
-  init();
-  draw();
 
 };
 
-return Visualizer;
+module.exports = Visualizer;
 
 
 

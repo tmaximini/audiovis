@@ -5,6 +5,8 @@ var gulp = require('gulp');
 
 // load plugins
 var $ = require('gulp-load-plugins')();
+var browserify = require('browserify');
+var transform = require('vinyl-transform');
 
 gulp.task('styles', function () {
     return gulp.src('app/styles/main.scss')
@@ -18,10 +20,16 @@ gulp.task('styles', function () {
 });
 
 gulp.task('scripts', function () {
-    return gulp.src('app/scripts/**/*.js')
-        .pipe($.jshint())
-        .pipe($.jshint.reporter(require('jshint-stylish')))
-        .pipe($.size());
+  var browserified = transform(function(filename) {
+    var b = browserify(filename);
+    return b.bundle();
+  });
+
+  return gulp.src('app/scripts/app.js')
+    .pipe($.jshint())
+    .pipe($.jshint.reporter(require('jshint-stylish')))
+    .pipe(browserified)
+    .pipe(gulp.dest('./app/build/js'));
 });
 
 gulp.task('html', ['styles', 'scripts'], function () {
@@ -91,7 +99,7 @@ gulp.task('connect', function () {
         });
 });
 
-gulp.task('serve', ['connect', 'styles'], function () {
+gulp.task('serve', ['connect', 'styles', 'scripts'], function () {
     require('opn')('http://localhost:9000');
 });
 
