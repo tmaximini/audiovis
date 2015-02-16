@@ -1,8 +1,12 @@
 'use strict';
 
+// https://github.com/mdn/voice-change-o-matic/blob/gh-pages/scripts/app.js#L128-L205
+
 var Visualizer = function() {
 
   var self = this;
+
+  var bufferLength = 512;
 
   var canvas, w, h, ctx;
   var counter = 0;
@@ -39,6 +43,10 @@ var Visualizer = function() {
     //clearAll();
     counter += 5;
     modX = getRandomNumber({ range: 2 });
+  };
+
+  this.setBufferLength = function(length) {
+    bufferLength = length;
   };
 
   this.init = function() {
