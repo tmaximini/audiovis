@@ -3,8 +3,13 @@
 // @credit: some code taken from http://www.michaelbromley.co.uk/experiments/soundcloud-vis/
 
 var Analyser = function(audioElement) {
+
   var self = this;
+
+  // public properties
   this.audioElement = audioElement;
+  this.volume = 0;
+  this.streamData = new Uint8Array(128);
 
   var analyser,
     sampleInterval;
@@ -25,7 +30,6 @@ var Analyser = function(audioElement) {
 
   var sampleAudioStream = function() {
       analyser.getByteFrequencyData(self.streamData);
-
       // calculate an overall volume value
       var total = 0;
       for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
@@ -33,16 +37,18 @@ var Analyser = function(audioElement) {
       }
       self.volume = total;
   };
-  // public properties and methods
-  this.volume = 0;
-  this.streamData = new Uint8Array(128);
 
+  // public methods
   this.start = function() {
     sampleInterval = setInterval(sampleAudioStream, 20);
   };
 
   this.stop = function() {
     clearInterval(sampleInterval);
+  };
+
+  this.getAnalyser = function() {
+    return analyser;
   };
 
 };

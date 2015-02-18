@@ -62,11 +62,11 @@ gulp.task('images', function () {
 });
 
 gulp.task('fonts', function () {
-    return $.bowerFiles()
-        .pipe($.filter('**/*.{eot,svg,ttf,woff}'))
-        .pipe($.flatten())
-        .pipe(gulp.dest('dist/fonts'))
-        .pipe($.size());
+    // return $.bowerFiles()
+    //     .pipe($.filter('**/*.{eot,svg,ttf,woff}'))
+    //     .pipe($.flatten())
+    //     .pipe(gulp.dest('dist/fonts'))
+    //     .pipe($.size());
 });
 
 gulp.task('extras', function () {

@@ -13,13 +13,10 @@ var visualizer = new AudioVisualizer();
 
 
 
-// init sound player
-// scPlayer.play({ streamUrl: DUMMY_URL });
-
-// OR in other cases you need to load TRACK and resolve it's data
+// resolve track from soundcloud URL
 scPlayer.resolve(DUMMY_URL, function (track) {
     if (track) {
-        console.error(track);
+        console.log('track playing:', track);
         // once track is loaded it can be played
         scPlayer.play();
     }
@@ -28,7 +25,7 @@ scPlayer.resolve(DUMMY_URL, function (track) {
 
 // init viz
 visualizer.init();
-visualizer.draw();
+visualizer.visualize(analyser.getAnalyser(), 'frequency');
 
 console.log('scPlayer: ', scPlayer.audio);
 console.log('analyser: ', AudioAnalyser);

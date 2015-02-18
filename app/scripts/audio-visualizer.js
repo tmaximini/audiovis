@@ -8,7 +8,7 @@ var Visualizer = function() {
 
   var bufferLength = 512;
 
-  var canvas, w, h, ctx;
+  var canvas, w, h, ctx, drawVisual;
   var counter = 0;
 
   // modifier vars
@@ -59,14 +59,68 @@ var Visualizer = function() {
     setInterval(updateModifiers, 250);
   };
 
-  this.draw = function() {
-    rotate();
-    ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-    ctx.strokeStyle = colors[Math.floor(Math.random() * colors.length)];
-    var zeroOrOne = Math.random() < 0.5 ? 0 : 1;
-    ctx[methods[zeroOrOne]](w/2 + getRandomNumber(), h/2 + getRandomNumber(), 50 * (1+modX) , 50 * (1+modX));
-    window.requestAnimationFrame(self.draw);
-  };
+  this.visualize = function(analyser, visMode) {
+    analyser.fftSize = 2048;
+    var bufferLength = analyser.fftSize;
+    console.log(bufferLength);
+    var dataArray = new Uint8Array(bufferLength);
+
+    ctx.clearRect(0, 0, h, w);
+
+    function drawRects() {
+      rotate();
+      ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+      ctx.strokeStyle = colors[Math.floor(Math.random() * colors.length)];
+      var zeroOrOne = Math.random() < 0.5 ? 0 : 1;
+      ctx[methods[zeroOrOne]](w/2 + getRandomNumber(), h/2 + getRandomNumber(), 50 * (1+modX) , 50 * (1+modX));
+      drawVisual = window.requestAnimationFrame(drawRects);
+    };
+
+    function drawFrequency() {
+      drawVisual = requestAnimationFrame(drawFrequency);
+      analyser.getByteTimeDomainData(dataArray);
+
+      ctx.fillStyle = 'rgb(200, 200, 200)';
+      ctx.fillRect(0, 0, h, w);
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgb(0, 0, 0)';
+
+      ctx.beginPath();
+
+      var sliceWidth = h * 1.0 / bufferLength;
+      var x = 0;
+
+      // go over spectrum and draw line
+      for(var i = 0; i < bufferLength; i++) {
+        var v = dataArray[i] / 128.0;
+        var y = v * h/2;
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+      ctx.lineTo(canvas.width, canvas.height/2);
+      ctx.stroke();
+    };
+
+    switch(visMode) {
+      case 'rect':
+        drawRects();
+        break;
+      case 'frequency':
+        drawFrequency();
+        break;
+      default:
+        drawFrequency();
+    }
+
+
+
+  }
 
 };
 
