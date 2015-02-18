@@ -27,15 +27,11 @@ scPlayer.resolve(DUMMY_URL, function (track) {
 // init viz
 visualizer.init();
 visualizer.visualize(analyser.getAnalyser(), 'bars');
-analyser.start();
+// analyser.start();
 
-console.log('scPlayer: ', scPlayer.audio);
-console.log('analyser: ', AudioAnalyser);
 
 },{"./audio-analyser":2,"./audio-visualizer":3,"soundcloud-audio":4}],2:[function(require,module,exports){
 'use strict';
-
-// @credit: some code taken from http://www.michaelbromley.co.uk/experiments/soundcloud-vis/
 
 var Analyser = function(audioElement) {
 

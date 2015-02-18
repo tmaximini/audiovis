@@ -1,7 +1,5 @@
 'use strict';
 
-// @credit: some code taken from http://www.michaelbromley.co.uk/experiments/soundcloud-vis/
-
 var Analyser = function(audioElement) {
 
   var self = this;
