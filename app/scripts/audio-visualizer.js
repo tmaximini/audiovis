@@ -84,8 +84,6 @@ var Visualizer = function() {
       drawVisual = requestAnimationFrame(drawBars);
       analyser.getByteFrequencyData(dataArray);
 
-      console.log('h, w: ', h, w);
-
       ctx.fillStyle = 'rgb(255, 255, 255)';
       ctx.fillRect(0, 0, w, h);
 
@@ -94,8 +92,8 @@ var Visualizer = function() {
       var x = 0;
 
       for (var i = 0; i < bufferLength; i++) {
-        barHeight = dataArray[i];
-        ctx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)';
+        barHeight = dataArray[i] * 2;
+        ctx.fillStyle = 'rgb(50,50,' + (barHeight / 2) + ')';
         ctx.fillRect(x,h-barHeight/2,barWidth,barHeight/2);
         x += barWidth + 1;
       }
@@ -107,7 +105,7 @@ var Visualizer = function() {
       drawVisual = requestAnimationFrame(drawFrequency);
       analyser.getByteTimeDomainData(dataArray);
 
-      ctx.fillStyle = 'rgb(200, 200, 200)';
+      ctx.fillStyle = 'rgb(50, 120, 50)';
       ctx.fillRect(0, 0, w, h);
 
       ctx.lineWidth = 2;
@@ -116,7 +114,6 @@ var Visualizer = function() {
       ctx.beginPath();
 
       var sliceWidth = (h * 1.0 / bufferLength) * (w / bufferLength) * 2;
-      console.log('sliceWidth: ', sliceWidth);
       var x = 0;
 
       // go over spectrum and draw line
