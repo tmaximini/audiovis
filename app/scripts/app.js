@@ -25,7 +25,8 @@ scPlayer.resolve(DUMMY_URL, function (track) {
 
 // init viz
 visualizer.init();
-visualizer.visualize(analyser.getAnalyser(), 'frequency');
+visualizer.visualize(analyser.getAnalyser(), 'bars');
+analyser.start();
 
 console.log('scPlayer: ', scPlayer.audio);
 console.log('analyser: ', AudioAnalyser);

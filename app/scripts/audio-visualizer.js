@@ -60,6 +60,8 @@ var Visualizer = function() {
   };
 
   this.visualize = function(analyser, visMode) {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
     analyser.fftSize = 2048;
     var bufferLength = analyser.fftSize;
     console.log(bufferLength);
@@ -76,19 +78,45 @@ var Visualizer = function() {
       drawVisual = window.requestAnimationFrame(drawRects);
     };
 
+    function drawBars() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      drawVisual = requestAnimationFrame(drawBars);
+      analyser.getByteFrequencyData(dataArray);
+
+      console.log('h, w: ', h, w);
+
+      ctx.fillStyle = 'rgb(255, 255, 255)';
+      ctx.fillRect(0, 0, w, h);
+
+      var barWidth = (w / bufferLength) * 2.5;
+      var barHeight;
+      var x = 0;
+
+      for (var i = 0; i < bufferLength; i++) {
+        barHeight = dataArray[i];
+        ctx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)';
+        ctx.fillRect(x,h-barHeight/2,barWidth,barHeight/2);
+        x += barWidth + 1;
+      }
+    };
+
     function drawFrequency() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
       drawVisual = requestAnimationFrame(drawFrequency);
       analyser.getByteTimeDomainData(dataArray);
 
       ctx.fillStyle = 'rgb(200, 200, 200)';
-      ctx.fillRect(0, 0, h, w);
+      ctx.fillRect(0, 0, w, h);
 
       ctx.lineWidth = 2;
       ctx.strokeStyle = 'rgb(0, 0, 0)';
 
       ctx.beginPath();
 
-      var sliceWidth = h * 1.0 / bufferLength;
+      var sliceWidth = (h * 1.0 / bufferLength) * (w / bufferLength) * 2;
+      console.log('sliceWidth: ', sliceWidth);
       var x = 0;
 
       // go over spectrum and draw line
@@ -114,11 +142,14 @@ var Visualizer = function() {
       case 'frequency':
         drawFrequency();
         break;
+      case 'bars':
+        analyser.fftSize = 256;
+        bufferLength = analyser.frequencyBinCount;
+        drawBars();
+        break;
       default:
         drawFrequency();
     }
-
-
 
   }
 

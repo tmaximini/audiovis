@@ -11,6 +11,8 @@ var Analyser = function(audioElement) {
   this.volume = 0;
   this.streamData = new Uint8Array(128);
 
+  var THRESHHOLD = 0.3;
+
   var analyser,
     sampleInterval;
 
