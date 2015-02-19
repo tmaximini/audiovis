@@ -26,8 +26,9 @@ scPlayer.resolve(DUMMY_URL, function (track) {
 
 // init viz
 visualizer.init();
-visualizer.visualize(analyser.getAnalyser(), 'bars');
-// analyser.start();
+// can be either 'bars', 'frequency' or 'rects'
+visualizer.visualize(analyser.getAnalyser(), 'frequency');
+analyser.start();
 
 
 },{"./audio-analyser":2,"./audio-visualizer":3,"soundcloud-audio":4}],2:[function(require,module,exports){
@@ -61,6 +62,8 @@ var Analyser = function(audioElement) {
   source.connect(analyser);
   analyser.connect(audioCtx.destination);
 
+  var maxVol = 0;
+
   var sampleAudioStream = function() {
       analyser.getByteFrequencyData(self.streamData);
       // calculate an overall volume value
@@ -69,6 +72,12 @@ var Analyser = function(audioElement) {
           total += self.streamData[i];
       }
       self.volume = total;
+
+      maxVol = maxVol > total ? maxVol : total;
+
+      if (total > maxVol * 0.9) {
+        console.log('beat: ', total);
+      }
   };
 
   // public methods
@@ -155,7 +164,6 @@ var Visualizer = function() {
     h = canvas.height = window.innerHeight;
     analyser.fftSize = 2048;
     var bufferLength = analyser.fftSize;
-    console.log(bufferLength);
     var dataArray = new Uint8Array(bufferLength);
 
     ctx.clearRect(0, 0, h, w);
@@ -206,8 +214,7 @@ var Visualizer = function() {
 
       ctx.beginPath();
 
-      var sliceWidth = (h * 1.0 / bufferLength) * (w / bufferLength) * 2;
-      console.log('sliceWidth: ', sliceWidth);
+      var sliceWidth = (h * 1.0 / bufferLength) * (w / bufferLength * 2);
       var x = 0;
 
       // go over spectrum and draw line
@@ -227,7 +234,7 @@ var Visualizer = function() {
     };
 
     switch(visMode) {
-      case 'rect':
+      case 'rects':
         drawRects();
         break;
       case 'frequency':

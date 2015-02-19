@@ -64,7 +64,6 @@ var Visualizer = function() {
     h = canvas.height = window.innerHeight;
     analyser.fftSize = 2048;
     var bufferLength = analyser.fftSize;
-    console.log(bufferLength);
     var dataArray = new Uint8Array(bufferLength);
 
     ctx.clearRect(0, 0, h, w);
@@ -115,8 +114,7 @@ var Visualizer = function() {
 
       ctx.beginPath();
 
-      var sliceWidth = (h * 1.0 / bufferLength) * (w / bufferLength) * 2;
-      console.log('sliceWidth: ', sliceWidth);
+      var sliceWidth = (h * 1.0 / bufferLength) * (w / bufferLength * 2);
       var x = 0;
 
       // go over spectrum and draw line
@@ -136,7 +134,7 @@ var Visualizer = function() {
     };
 
     switch(visMode) {
-      case 'rect':
+      case 'rects':
         drawRects();
         break;
       case 'frequency':

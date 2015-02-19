@@ -28,6 +28,8 @@ var Analyser = function(audioElement) {
   source.connect(analyser);
   analyser.connect(audioCtx.destination);
 
+  var maxVol = 0;
+
   var sampleAudioStream = function() {
       analyser.getByteFrequencyData(self.streamData);
       // calculate an overall volume value
@@ -36,6 +38,12 @@ var Analyser = function(audioElement) {
           total += self.streamData[i];
       }
       self.volume = total;
+
+      maxVol = maxVol > total ? maxVol : total;
+
+      if (total > maxVol * 0.9) {
+        console.log('beat: ', total);
+      }
   };
 
   // public methods

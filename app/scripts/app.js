@@ -25,6 +25,7 @@ scPlayer.resolve(DUMMY_URL, function (track) {
 
 // init viz
 visualizer.init();
-visualizer.visualize(analyser.getAnalyser(), 'bars');
-// analyser.start();
+// can be either 'bars', 'frequency' or 'rects'
+visualizer.visualize(analyser.getAnalyser(), 'frequency');
+analyser.start();
 
