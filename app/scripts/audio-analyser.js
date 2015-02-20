@@ -1,5 +1,7 @@
 'use strict';
 
+var BeatDetector = require('./webaudiox.beat-detector');
+
 var Analyser = function(audioElement) {
 
   var self = this;
@@ -12,6 +14,7 @@ var Analyser = function(audioElement) {
   var THRESHHOLD = 0.3;
 
   var analyser,
+    beatDetector,
     sampleInterval;
 
   var audioCtx = new (window.AudioContext || window.webkitAudioContext);
@@ -23,6 +26,12 @@ var Analyser = function(audioElement) {
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 256;
 
+  var onBeat = function() {
+    console.log('BEAAT!');
+  };
+
+  beatDetector = new BeatDetector(analyser, onBeat);
+
   // wire up analyser
   var source = audioCtx.createMediaElementSource(audioElement);
   source.connect(analyser);
@@ -33,17 +42,18 @@ var Analyser = function(audioElement) {
   var sampleAudioStream = function() {
       analyser.getByteFrequencyData(self.streamData);
       // calculate an overall volume value
-      var total = 0;
-      for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
-          total += self.streamData[i];
-      }
-      self.volume = total;
+      // var total = 0;
+      // for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
+      //     total += self.streamData[i];
+      // }
+      // self.volume = total;
 
-      maxVol = maxVol > total ? maxVol : total;
+      // maxVol = maxVol > total ? maxVol : total;
 
-      if (total > maxVol * 0.9) {
-        console.log('beat: ', total);
-      }
+      // if (total > maxVol * 0.9) {
+      //   console.log('beat: ', total);
+      // }
+      beatDetector.update(1/60);
   };
 
   // public methods

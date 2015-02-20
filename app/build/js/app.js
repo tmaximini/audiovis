@@ -31,8 +31,10 @@ visualizer.visualize(analyser.getAnalyser(), 'frequency');
 analyser.start();
 
 
-},{"./audio-analyser":2,"./audio-visualizer":3,"soundcloud-audio":4}],2:[function(require,module,exports){
+},{"./audio-analyser":2,"./audio-visualizer":3,"soundcloud-audio":5}],2:[function(require,module,exports){
 'use strict';
+
+var BeatDetector = require('./webaudiox.beat-detector');
 
 var Analyser = function(audioElement) {
 
@@ -46,6 +48,7 @@ var Analyser = function(audioElement) {
   var THRESHHOLD = 0.3;
 
   var analyser,
+    beatDetector,
     sampleInterval;
 
   var audioCtx = new (window.AudioContext || window.webkitAudioContext);
@@ -57,6 +60,12 @@ var Analyser = function(audioElement) {
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 256;
 
+  var onBeat = function() {
+    console.log('BEAAT!');
+  };
+
+  beatDetector = new BeatDetector(analyser, onBeat);
+
   // wire up analyser
   var source = audioCtx.createMediaElementSource(audioElement);
   source.connect(analyser);
@@ -67,17 +76,18 @@ var Analyser = function(audioElement) {
   var sampleAudioStream = function() {
       analyser.getByteFrequencyData(self.streamData);
       // calculate an overall volume value
-      var total = 0;
-      for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
-          total += self.streamData[i];
-      }
-      self.volume = total;
+      // var total = 0;
+      // for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
+      //     total += self.streamData[i];
+      // }
+      // self.volume = total;
 
-      maxVol = maxVol > total ? maxVol : total;
+      // maxVol = maxVol > total ? maxVol : total;
 
-      if (total > maxVol * 0.9) {
-        console.log('beat: ', total);
-      }
+      // if (total > maxVol * 0.9) {
+      //   console.log('beat: ', total);
+      // }
+      beatDetector.update(1/60);
   };
 
   // public methods
@@ -97,7 +107,7 @@ var Analyser = function(audioElement) {
 
 module.exports = Analyser;
 
-},{}],3:[function(require,module,exports){
+},{"./webaudiox.beat-detector":4}],3:[function(require,module,exports){
 'use strict';
 
 // https://github.com/mdn/voice-change-o-matic/blob/gh-pages/scripts/app.js#L128-L205
@@ -261,6 +271,75 @@ module.exports = Visualizer;
 
 
 },{}],4:[function(require,module,exports){
+// @namespace defined WebAudiox namespace
+var WebAudiox = WebAudiox || {};
+
+/**
+ * display an analyser node in a canvas
+ * * See http://www.airtightinteractive.com/2013/10/making-audio-reactive-visuals/
+ *
+ * @param  {AnalyserNode} analyser     the analyser node
+ * @param  {Number}   smoothFactor the smooth factor for smoothed volume
+ */
+WebAudiox.AnalyserBeatDetector  = function(analyser, onBeatCallback) {
+  // arguments default values
+  this.holdTime = 0.33;
+  this.decayRate = 0.9;
+  this.minVolume = 0.2;
+  this.frequencyBinCount = 80;
+
+  var holdingTime = 0;
+  var threshold = this.minVolume;
+  this.update = function(delta) {
+    var rawVolume = WebAudiox.AnalyserBeatDetector.compute(analyser, this.frequencyBinCount);
+    if ( holdingTime > 0) {
+      holdingTime -= delta;
+      holdingTime = Math.max(holdingTime, 0);
+    }
+    else if (rawVolume > threshold) {
+      onBeatCallback();
+      holdingTime = this.holdTime;
+      threshold = rawVolume * 1.1;
+      threshold = Math.max(threshold, this.minVolume);
+    }
+    else {
+      threshold *= this.decayRate;
+      threshold = Math.max(threshold, this.minVolume);
+    }
+  };
+}
+
+/**
+ * do a average on a ByteFrequencyData from an analyser node
+ * @param  {AnalyserNode} analyser the analyser node
+ * @param  {Number} width    how many elements of the array will be considered
+ * @param  {Number} offset   the index of the element to consider
+ * @return {Number}          the ByteFrequency average
+ */
+WebAudiox.AnalyserBeatDetector.compute  = function(analyser, width, offset){
+  // handle paramerter
+  width = width !== undefined ? width : analyser.frequencyBinCount;
+  offset = offset !== undefined ? offset : 0;
+  // inint variable
+  var freqByte = new Uint8Array(analyser.frequencyBinCount);
+  // get the frequency data
+  analyser.getByteFrequencyData(freqByte);
+  // compute the sum
+  var sum = 0;
+  for(var i = offset; i < offset+width; i++) {
+    sum += freqByte[i];
+  }
+  // compute the amplitude
+  var amplitude = sum / (width*256-1);
+  // return amplitude
+  return amplitude;
+};
+
+module.exports = WebAudiox.AnalyserBeatDetector;
+
+
+
+},{}],5:[function(require,module,exports){
 'use strict';
 
 function SoundCloud (clientId) {
