@@ -1,8 +1,15 @@
 'use strict';
 
+var BeatDetektor = require('./beatdetector');
+
 var Analyser = function(audioElement) {
 
   var self = this;
+
+  // beat detecktor stuff
+  var beatDetektor = new BeatDetektor();
+  var vu      = new BeatDetektor.modules.vis.VU();
+  var bassKick    = new BeatDetektor.modules.vis.BassKick();
 
   // public properties
   this.audioElement = audioElement;
@@ -25,8 +32,48 @@ var Analyser = function(audioElement) {
 
   // wire up analyser
   var source = audioCtx.createMediaElementSource(audioElement);
+  var jsProcessor = audioCtx.createScriptProcessor(2048);
+  var ftimer  = 0;
+
+
   source.connect(analyser);
-  analyser.connect(audioCtx.destination);
+  analyser.connect(jsProcessor);
+  jsProcessor.connect(audioCtx.destination);
+
+
+
+  jsProcessor.onaudioprocess =  function(audioProcessingEvent) {
+    // Get left channel input. No need for output arrays. They're hooked up
+    // directly to the destination, and we're not doing any processing.
+    var inputArrayL = audioProcessingEvent.inputBuffer.getChannelData(0);
+    // for beatDetektor.js
+    beatDetektor.process(audioCtx.currentTime, inputArrayL);
+    // for basskick
+    bassKick.process(beatDetektor)
+    // for the vumeter
+    ftimer += beatDetektor.last_update;
+    if (ftimer > 1.0 / 24.0) {
+      vu.process(beatDetektor, ftimer);
+      ftimer = 0;
+    }
+
+    var inputBuffer = audioProcessingEvent.inputBuffer;
+    // The output buffer contains the samples that will be modified and played
+    var outputBuffer = audioProcessingEvent.outputBuffer;
+
+    // Loop through the output channels (in this case there is only one)
+    for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+      var inputData = inputBuffer.getChannelData(channel);
+      var outputData = outputBuffer.getChannelData(channel);
+
+      // Loop through the 4096 samples
+      for (var sample = 0; sample < inputBuffer.length; sample++) {
+        // make output equal to the same as the input
+        outputData[sample] = inputData[sample];
+
+      }
+    }
+  };
 
   var maxVol = 0;
 
@@ -42,7 +89,7 @@ var Analyser = function(audioElement) {
       maxVol = maxVol > total ? maxVol : total;
 
       if (total > maxVol * 0.9) {
-        console.log('beat: ', total);
+        // console.log('beat: ', total);
       }
   };
 
