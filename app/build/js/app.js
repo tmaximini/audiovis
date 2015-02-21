@@ -1,7 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var DUMMY_URL = 'https://soundcloud.com/maximini/cat-vibes';
+var DUMMY_URL = 'https://soundcloud.com/moltenmoods/molten-moods-2-preview-1';
 
 var SC_CLIENT_ID = '96414176b255a0cd49471feed2e61c93';
 var SoundCloudAudio = require('soundcloud-audio');
@@ -12,22 +12,36 @@ var scPlayer = new SoundCloudAudio(SC_CLIENT_ID);
 var analyser = new AudioAnalyser(scPlayer.audio);
 var visualizer = new AudioVisualizer();
 
-
+var form = document.querySelector('form');
 
 // resolve track from soundcloud URL
-scPlayer.resolve(DUMMY_URL, function (track) {
-    if (track) {
-        console.log('track playing:', track);
-        // once track is loaded it can be played
-        scPlayer.play();
-    }
-});
+var resolveSoundcloudUrl = function(url) {
+    url = url || DUMMY_URL;
+    scPlayer.resolve(url, function (track) {
+        if (track) {
+            console.log('track playing:', track);
+            // once track is loaded it can be played
+            scPlayer.play();
+        }
+    });
+};
 
+var handleFormSubmit = function(e) {
+    e.preventDefault();
+    var scInput = document.getElementById('soundcloud-track-url');
+    if (scInput && scInput.value && /soundcloud/.test(scInput.value.toLowerCase())) {
+        resolveSoundcloudUrl(scInput.value);
+    }
+    return false;
+};
+
+form.addEventListener('submit', handleFormSubmit, false);
+resolveSoundcloudUrl();
 
 // init viz
 visualizer.init();
-// can be either 'bars', 'frequency' or 'rects'
-visualizer.visualize(analyser.getAnalyser(), 'frequency');
+// can be either 'bars', 'freq' or 'rects'
+visualizer.visualize(analyser.getAnalyser(), 'bars');
 analyser.start();
 
 
@@ -74,19 +88,6 @@ var Analyser = function(audioElement) {
   var maxVol = 0;
 
   var sampleAudioStream = function() {
-      analyser.getByteFrequencyData(self.streamData);
-      // calculate an overall volume value
-      // var total = 0;
-      // for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
-      //     total += self.streamData[i];
-      // }
-      // self.volume = total;
-
-      // maxVol = maxVol > total ? maxVol : total;
-
-      // if (total > maxVol * 0.9) {
-      //   console.log('beat: ', total);
-      // }
       beatDetector.update(1/60);
   };
 
@@ -161,6 +162,7 @@ var Visualizer = function() {
 
   this.init = function() {
     canvas = document.createElement('canvas');
+    canvas.setAttribute('class', 'audioviz-canvas');
     document.body.appendChild(canvas);
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
@@ -192,8 +194,6 @@ var Visualizer = function() {
       h = canvas.height = window.innerHeight;
       drawVisual = requestAnimationFrame(drawBars);
       analyser.getByteFrequencyData(dataArray);
-
-      console.log('h, w: ', h, w);
 
       ctx.fillStyle = 'rgb(255, 255, 255)';
       ctx.fillRect(0, 0, w, h);
@@ -247,7 +247,7 @@ var Visualizer = function() {
       case 'rects':
         drawRects();
         break;
-      case 'frequency':
+      case 'freq':
         drawFrequency();
         break;
       case 'bars':

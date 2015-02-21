@@ -51,6 +51,7 @@ var Visualizer = function() {
 
   this.init = function() {
     canvas = document.createElement('canvas');
+    canvas.setAttribute('class', 'audioviz-canvas');
     document.body.appendChild(canvas);
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
@@ -82,8 +83,6 @@ var Visualizer = function() {
       h = canvas.height = window.innerHeight;
       drawVisual = requestAnimationFrame(drawBars);
       analyser.getByteFrequencyData(dataArray);
-
-      console.log('h, w: ', h, w);
 
       ctx.fillStyle = 'rgb(255, 255, 255)';
       ctx.fillRect(0, 0, w, h);
@@ -137,7 +136,7 @@ var Visualizer = function() {
       case 'rects':
         drawRects();
         break;
-      case 'frequency':
+      case 'freq':
         drawFrequency();
         break;
       case 'bars':

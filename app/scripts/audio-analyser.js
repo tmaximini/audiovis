@@ -40,19 +40,6 @@ var Analyser = function(audioElement) {
   var maxVol = 0;
 
   var sampleAudioStream = function() {
-      analyser.getByteFrequencyData(self.streamData);
-      // calculate an overall volume value
-      // var total = 0;
-      // for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
-      //     total += self.streamData[i];
-      // }
-      // self.volume = total;
-
-      // maxVol = maxVol > total ? maxVol : total;
-
-      // if (total > maxVol * 0.9) {
-      //   console.log('beat: ', total);
-      // }
       beatDetector.update(1/60);
   };
 

@@ -16,3 +16,20 @@ body {
     color: #000;
     padding: 0.2em 0;
 }
+
+
+.audioviz-controls {
+    position: fixed;
+    padding: 10px;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    width: 300px;
+    height: 300px;
+
+    input[type=text] {
+        width: 200px;
+    }
+
+}
