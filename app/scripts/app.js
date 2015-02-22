@@ -1,7 +1,6 @@
 'use strict';
 
 var DUMMY_URL = 'https://soundcloud.com/moltenmoods/molten-moods-2-preview-1';
-
 var SC_CLIENT_ID = '96414176b255a0cd49471feed2e61c93';
 var SoundCloudAudio = require('soundcloud-audio');
 var AudioAnalyser = require('./audio-analyser');
@@ -12,6 +11,9 @@ var analyser = new AudioAnalyser(scPlayer.audio);
 var visualizer = new AudioVisualizer();
 
 var form = document.querySelector('form');
+var switches = document.querySelectorAll('.switcher span.switch');
+
+var VIZ_TYPES = ['bars', 'freq', 'rects'];
 
 // resolve track from soundcloud URL
 var resolveSoundcloudUrl = function(url) {
@@ -34,12 +36,26 @@ var handleFormSubmit = function(e) {
     return false;
 };
 
-form.addEventListener('submit', handleFormSubmit, false);
-resolveSoundcloudUrl();
+var setViz = function(type) {
+    visualizer.visualize(analyser.getAnalyser(), type);
+};
 
+
+/**
+ * EVENT HANDLERS
+ */
+form.addEventListener('submit', handleFormSubmit, false);
+for (var i = 0; i < switches.length; i++) {
+    console.log('setViz: ', setViz);
+    switches[i].addEventListener('click', setViz.bind(null, VIZ_TYPES[i]), false);
+}
+
+
+// init sound
+resolveSoundcloudUrl();
 // init viz
 visualizer.init();
 // can be either 'bars', 'freq' or 'rects'
 visualizer.visualize(analyser.getAnalyser(), 'bars');
-analyser.start();
+// analyser.start();
 
