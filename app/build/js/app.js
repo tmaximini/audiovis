@@ -47,9 +47,9 @@ var setViz = function(type) {
  */
 form.addEventListener('submit', handleFormSubmit, false);
 for (var i = 0; i < switches.length; i++) {
-    console.log('setViz: ', setViz);
     switches[i].addEventListener('click', setViz.bind(null, VIZ_TYPES[i]), false);
 }
+
 
 
 // init sound
@@ -58,7 +58,8 @@ resolveSoundcloudUrl();
 visualizer.init();
 // can be either 'bars', 'freq' or 'rects'
 visualizer.visualize(analyser.getAnalyser(), 'bars');
-// analyser.start();
+// can take a onBeat callback as first argument
+analyser.start();
 
 
 },{"./audio-analyser":2,"./audio-visualizer":3,"soundcloud-audio":5}],2:[function(require,module,exports){
@@ -90,12 +91,6 @@ var Analyser = function(audioElement) {
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 256;
 
-  var onBeat = function() {
-    console.log('BEAAT!');
-  };
-
-  beatDetector = new BeatDetector(analyser, onBeat);
-
   // wire up analyser
   var source = audioCtx.createMediaElementSource(audioElement);
   source.connect(analyser);
@@ -108,8 +103,14 @@ var Analyser = function(audioElement) {
   };
 
   // public methods
-  this.start = function() {
+  this.start = function(onBeatCallback) {
+    if (!onBeatCallback) {
+      onBeatCallback = function() {
+        console.log('beat');
+      }
+    }
     sampleInterval = setInterval(sampleAudioStream, 20);
+    beatDetector = new BeatDetector(analyser, onBeatCallback);
   };
 
   this.stop = function() {

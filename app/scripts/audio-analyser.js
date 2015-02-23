@@ -26,12 +26,6 @@ var Analyser = function(audioElement) {
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 256;
 
-  var onBeat = function() {
-    console.log('BEAAT!');
-  };
-
-  beatDetector = new BeatDetector(analyser, onBeat);
-
   // wire up analyser
   var source = audioCtx.createMediaElementSource(audioElement);
   source.connect(analyser);
@@ -44,8 +38,14 @@ var Analyser = function(audioElement) {
   };
 
   // public methods
-  this.start = function() {
+  this.start = function(onBeatCallback) {
+    if (!onBeatCallback) {
+      onBeatCallback = function() {
+        console.log('beat');
+      }
+    }
     sampleInterval = setInterval(sampleAudioStream, 20);
+    beatDetector = new BeatDetector(analyser, onBeatCallback);
   };
 
   this.stop = function() {

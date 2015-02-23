@@ -46,9 +46,9 @@ var setViz = function(type) {
  */
 form.addEventListener('submit', handleFormSubmit, false);
 for (var i = 0; i < switches.length; i++) {
-    console.log('setViz: ', setViz);
     switches[i].addEventListener('click', setViz.bind(null, VIZ_TYPES[i]), false);
 }
+
 
 
 // init sound
@@ -57,5 +57,6 @@ resolveSoundcloudUrl();
 visualizer.init();
 // can be either 'bars', 'freq' or 'rects'
 visualizer.visualize(analyser.getAnalyser(), 'bars');
-// analyser.start();
+// can take a onBeat callback as first argument
+analyser.start();
 
