@@ -13,6 +13,8 @@ var visualizer = new AudioVisualizer();
 
 var form = document.querySelector('form');
 var switches = document.querySelectorAll('.switcher span.switch');
+var pause = document.querySelector('.switcher .pause');
+var play = document.querySelector('.switcher .play');
 
 var VIZ_TYPES = ['bars', 'freq', 'rects'];
 
@@ -24,6 +26,8 @@ var resolveSoundcloudUrl = function(url) {
             console.log('track playing:', track);
             // once track is loaded it can be played
             scPlayer.play();
+            pause.addEventListener('click', scPlayer.pause.bind(scPlayer), false);
+            play.addEventListener('click', scPlayer.play.bind(scPlayer), false);
         }
     });
 };
@@ -91,6 +95,7 @@ var Analyser = function(audioElement) {
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 256;
 
+
   // wire up analyser
   var source = audioCtx.createMediaElementSource(audioElement);
   source.connect(analyser);
@@ -99,6 +104,7 @@ var Analyser = function(audioElement) {
   var maxVol = 0;
 
   var sampleAudioStream = function() {
+      analyser.getByteFrequencyData(self.streamData);
       beatDetector.update(1/60);
   };
 
@@ -109,7 +115,7 @@ var Analyser = function(audioElement) {
         console.log('beat');
       }
     }
-    sampleInterval = setInterval(sampleAudioStream, 20);
+    sampleInterval = setInterval(sampleAudioStream, 1);
     beatDetector = new BeatDetector(analyser, onBeatCallback);
   };
 
@@ -302,7 +308,7 @@ WebAudiox.AnalyserBeatDetector  = function(analyser, onBeatCallback) {
   // arguments default values
   this.holdTime = 0.33;
   this.decayRate = 0.9;
-  this.minVolume = 0.2;
+  this.minVolume = 0.65;
   this.frequencyBinCount = 80;
 
   var holdingTime = 0;
@@ -313,7 +319,9 @@ WebAudiox.AnalyserBeatDetector  = function(analyser, onBeatCallback) {
       holdingTime -= delta;
       holdingTime = Math.max(holdingTime, 0);
     }
+
     else if (rawVolume > threshold) {
+      console.info(rawVolume);
       onBeatCallback();
       holdingTime = this.holdTime;
       threshold = rawVolume * 1.1;

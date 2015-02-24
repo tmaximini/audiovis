@@ -12,7 +12,7 @@ WebAudiox.AnalyserBeatDetector  = function(analyser, onBeatCallback) {
   // arguments default values
   this.holdTime = 0.33;
   this.decayRate = 0.9;
-  this.minVolume = 0.2;
+  this.minVolume = 0.65;
   this.frequencyBinCount = 80;
 
   var holdingTime = 0;
@@ -23,7 +23,9 @@ WebAudiox.AnalyserBeatDetector  = function(analyser, onBeatCallback) {
       holdingTime -= delta;
       holdingTime = Math.max(holdingTime, 0);
     }
+
     else if (rawVolume > threshold) {
+      console.info(rawVolume);
       onBeatCallback();
       holdingTime = this.holdTime;
       threshold = rawVolume * 1.1;

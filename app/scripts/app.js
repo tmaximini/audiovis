@@ -12,6 +12,8 @@ var visualizer = new AudioVisualizer();
 
 var form = document.querySelector('form');
 var switches = document.querySelectorAll('.switcher span.switch');
+var pause = document.querySelector('.switcher .pause');
+var play = document.querySelector('.switcher .play');
 
 var VIZ_TYPES = ['bars', 'freq', 'rects'];
 
@@ -23,6 +25,8 @@ var resolveSoundcloudUrl = function(url) {
             console.log('track playing:', track);
             // once track is loaded it can be played
             scPlayer.play();
+            pause.addEventListener('click', scPlayer.pause.bind(scPlayer), false);
+            play.addEventListener('click', scPlayer.play.bind(scPlayer), false);
         }
     });
 };
